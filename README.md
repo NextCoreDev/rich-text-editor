@@ -56,10 +56,12 @@ const styles = StyleSheet.create({
 
 ## Smart Formatting Features
 
-- **Selection-Based Formatting**: Format only selected text instead of the entire content
+- **Visual Formatting**: See formatting changes in real-time as you type
+- **Selection-Based Formatting**: Format only selected text while maintaining clean HTML/Markdown output
 - **Format State Tracking**: Visual feedback for active formatting options
 - **Nested Tag Prevention**: Automatically prevents and cleans up nested formatting tags
 - **Smart Tag Handling**: Proper handling of HTML tags and Markdown syntax
+- **Clean Output**: Stores formatted text as clean HTML or Markdown while showing rich text preview
 
 ## Components
 
@@ -151,6 +153,47 @@ interface FormatOptions {
 }
 ```
 
+## Usage Guide
+
+### Text Selection and Formatting
+
+1. Select text in the editor
+2. Click format buttons in the toolbar to apply formatting
+3. The selected text will be visually formatted
+4. The underlying content maintains clean HTML/Markdown
+
+### Best Practices
+
+1. Text Selection
+
+   - Select text before applying formatting
+   - Use format toolbar buttons for consistent formatting
+   - Clear selection to start fresh formatting
+
+2. Content Management
+
+   - Store formatted content as HTML or Markdown
+   - Use the Viewer component for displaying formatted content
+   - Implement proper content validation
+   - Consider content length limits
+
+3. Formatting
+
+   - Use consistent format options across your app
+   - Consider platform-specific formatting needs
+   - Test formatting in both HTML and Markdown modes
+
+4. Styling
+
+   - Follow platform design guidelines
+   - Ensure proper contrast ratios
+   - Test different content lengths
+
+5. Performance
+   - Handle large content efficiently
+   - Implement proper error boundaries
+   - Consider debouncing content updates
+
 ## Styling Guide
 
 Example styles for customizing the components:
@@ -196,37 +239,6 @@ const styles = StyleSheet.create({
   },
 });
 ```
-
-## Best Practices
-
-1. Text Selection
-
-   - Select text before applying formatting
-   - Use format toolbar buttons for consistent formatting
-   - Clear selection to start fresh formatting
-
-2. Content Management
-
-   - Handle content changes through the `onChange` prop
-   - Implement proper content validation
-   - Consider content length limits
-
-3. Formatting
-
-   - Use consistent format options across your app
-   - Consider platform-specific formatting needs
-   - Test formatting in both HTML and Markdown modes
-
-4. Styling
-
-   - Follow platform design guidelines
-   - Ensure proper contrast ratios
-   - Test different content lengths
-
-5. Performance
-   - Handle large content efficiently
-   - Implement proper error boundaries
-   - Consider debouncing content updates
 
 ## Security
 

@@ -19,17 +19,23 @@ export function formatText(
   if (!text) return text;
   
   let formattedText = text;
-  const appliedTags = new Set<string>();
+
+  // Remove existing formatting first
+  formattedText = sanitizeHtml(formattedText, {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
 
   if (outputFormat === 'html') {
-    formats.forEach((format) => {
-      // Prevent duplicate tags
-      if (appliedTags.has(format)) return;
-
-      const tag = getHtmlTag(format);
-      if (tag) {
-        formattedText = wrapWithTag(formattedText, tag);
-        appliedTags.add(format);
+    // Apply formatting in a specific order to prevent nesting issues
+    const formatOrder = ['bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'overline'];
+    
+    formatOrder.forEach(format => {
+      if (formats.has(format)) {
+        const tag = getHtmlTag(format);
+        if (tag) {
+          formattedText = wrapWithTag(formattedText, tag);
+        }
       }
     });
 
@@ -41,13 +47,15 @@ export function formatText(
   }
 
   if (outputFormat === 'markdown') {
-    formats.forEach((format) => {
-      if (appliedTags.has(format)) return;
-      
-      const marker = getMarkdownMarker(format);
-      if (marker) {
-        formattedText = `${marker}${formattedText}${marker}`;
-        appliedTags.add(format);
+    // Apply markdown formatting in reverse order to handle nested formats correctly
+    const formatOrder = ['overline', 'superscript', 'subscript', 'strikethrough', 'underline', 'italic', 'bold'];
+    
+    formatOrder.forEach(format => {
+      if (formats.has(format)) {
+        const marker = getMarkdownMarker(format);
+        if (marker) {
+          formattedText = `${marker}${formattedText}${marker}`;
+        }
       }
     });
   }
@@ -73,7 +81,6 @@ function getMarkdownMarker(format: string): string | null {
     case 'bold': return '**';
     case 'italic': return '_';
     case 'strikethrough': return '~~';
-    // HTML tags for unsupported markdown formats
     case 'underline': return '<u>';
     case 'subscript': return '<sub>';
     case 'superscript': return '<sup>';

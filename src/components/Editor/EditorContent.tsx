@@ -50,6 +50,16 @@ export function EditorContent({
         const newText =
           text.slice(0, start) + formattedSelection + text.slice(end);
         onChange(newText);
+
+        // Update cursor position after formatting
+        setTimeout(() => {
+          if (inputRef.current) {
+            const newPosition = start + formattedSelection.length;
+            inputRef.current.setNativeProps({
+              selection: { start: newPosition, end: newPosition },
+            });
+          }
+        }, 0);
       } else {
         onChange(text);
       }
@@ -71,12 +81,32 @@ export function EditorContent({
         value.slice(0, start) + formattedSelection + value.slice(end);
       onChange(newText);
     }
-  }, [selectedFormats, outputFormat]);
+  }, [selectedFormats, outputFormat, value, onChange]);
+
+  // Calculate text decoration line
+  const textDecorationLines: ("underline" | "line-through")[] = [];
+  if (selectedFormats.has("underline")) textDecorationLines.push("underline");
+  if (selectedFormats.has("strikethrough"))
+    textDecorationLines.push("line-through");
 
   return (
     <TextInput
       ref={inputRef}
-      style={[editorStyles.input, { minHeight }, textStyle]}
+      style={[
+        editorStyles.input,
+        { minHeight },
+        textStyle,
+        {
+          fontWeight: selectedFormats.has("bold") ? "bold" : "normal",
+          fontStyle: selectedFormats.has("italic") ? "italic" : "normal",
+          textDecorationLine: textDecorationLines.length
+            ? (textDecorationLines.join(" ") as
+                | "underline"
+                | "line-through"
+                | "underline line-through")
+            : "none",
+        },
+      ]}
       value={value}
       placeholder={placeholder}
       editable={!readOnly}
