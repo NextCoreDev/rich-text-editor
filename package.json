@@ -1,5 +1,5 @@
 {
-  "name": "@nextcoredev/rich-text-editor",
+  "name": "rich-textify",
   "version": "1.0.0",
   "private": false,
   "main": "dist/index.js",

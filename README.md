@@ -1,4 +1,4 @@
-# @nextcoredev/rich-text-editor
+# rich-textify
 
 A powerful and flexible rich text editor component for React and React Native applications. Features HTML and Markdown support, real-time preview, and extensive customization options.
 
@@ -17,13 +17,13 @@ A powerful and flexible rich text editor component for React and React Native ap
 ## Installation
 
 ```bash
-npm install @nextcoredev/rich-text-editor
+npm install rich-textify
 ```
 
 ## Quick Start
 
 ```tsx
-import { Editor, Viewer } from "@nextcoredev/rich-text-editor";
+import { Editor, Viewer } from "rich-textify";
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
 
@@ -210,7 +210,7 @@ import type {
   FormatOptions,
   OutputFormat,
   InputFormat,
-} from "@nextcoredev/rich-text-editor";
+} from "rich-textify";
 ```
 
 ## Best Practices
@@ -258,5 +258,5 @@ MIT © NextCoreDev
 
 ## Support
 
-- GitHub Issues: [Report a bug](https://github.com/NextCoreDev/rich-text-editor/issues)
-- Documentation: [View full documentation](https://github.com/nextcoredev/rich-text-editor#readme)
+- GitHub Issues: [Report a bug](https://github.com/NextCoreDev/rich-textify/issues)
+- Documentation: [View full documentation](https://github.com/nextcoredev/rich-textify#readme)
