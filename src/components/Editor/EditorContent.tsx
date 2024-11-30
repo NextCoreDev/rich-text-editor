@@ -5,7 +5,12 @@ import {
   NativeSyntheticEvent,
   TextInputSelectionChangeEventData,
 } from "react-native";
-import { formatText, getSelectedText, checkExistingFormat } from "../../utils";
+import {
+  formatText,
+  getSelectedText,
+  checkExistingFormat,
+  parseFormattedText,
+} from "../../utils";
 import type { EditorContentProps } from "../../types";
 import { editorStyles } from "../../styles";
 
@@ -25,7 +30,13 @@ export function EditorContent({
 }: EditorContentProps) {
   const inputRef = useRef<TextInput>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [displayValue, setDisplayValue] = useState("");
   const isFormattingRef = useRef(false);
+
+  // Update display value when the actual value changes
+  useEffect(() => {
+    setDisplayValue(parseFormattedText(value, "html"));
+  }, [value]);
 
   // Handle text selection changes
   const handleSelectionChange = useCallback(
@@ -56,18 +67,21 @@ export function EditorContent({
   const handleTextChange = useCallback(
     (text: string) => {
       if (maxLength && text.length > maxLength) return;
-      onChange(text);
+
+      // Apply active formats to new text if any format is selected
+      if (selectedFormats.size > 0) {
+        const formattedText = formatText(text, selectedFormats, outputFormat);
+        onChange(formattedText);
+      } else {
+        onChange(text);
+      }
     },
-    [maxLength, onChange]
+    [maxLength, onChange, selectedFormats, outputFormat]
   );
 
   // Apply formatting when format buttons are clicked
   useEffect(() => {
-    if (
-      selection.start !== selection.end &&
-      selectedFormats.size > 0 &&
-      !isFormattingRef.current
-    ) {
+    if (selection.start !== selection.end && !isFormattingRef.current) {
       isFormattingRef.current = true;
 
       const selectedText = getSelectedText(
@@ -85,7 +99,7 @@ export function EditorContent({
         value.slice(0, selection.start) +
         formattedText +
         value.slice(selection.end);
-      handleTextChange(newText);
+      onChange(newText);
 
       // Update cursor position
       setTimeout(() => {
@@ -98,14 +112,14 @@ export function EditorContent({
         isFormattingRef.current = false;
       }, 0);
     }
-  }, [selectedFormats, outputFormat, selection, value, handleTextChange]);
+  }, [selectedFormats, outputFormat, selection, value, onChange]);
 
   return (
     <View style={editorStyles.inputContainer}>
       <TextInput
         ref={inputRef}
         style={[editorStyles.input, { minHeight }, textStyle]}
-        value={value}
+        value={displayValue}
         placeholder={placeholder}
         editable={!readOnly}
         onChangeText={handleTextChange}

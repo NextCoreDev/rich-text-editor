@@ -22,37 +22,31 @@ export function parseFormattedText(
       }
     });
 
-    // Convert HTML to visible formatting
+    // Replace HTML tags with their actual formatted text
+    cleanedContent = cleanedContent
+      .replace(/<b>(.*?)<\/b>/g, '$1')
+      .replace(/<i>(.*?)<\/i>/g, '$1')
+      .replace(/<u>(.*?)<\/u>/g, '$1')
+      .replace(/<s>(.*?)<\/s>/g, '$1')
+      .replace(/<sub>(.*?)<\/sub>/g, '$1')
+      .replace(/<sup>(.*?)<\/sup>/g, '$1')
+      .replace(/<span[^>]*>(.*?)<\/span>/g, '$1');
+
     return sanitizeHtml(cleanedContent, {
-      allowedTags: ALLOWED_TAGS,
-      allowedAttributes: ALLOWED_ATTRIBUTES,
-      transformTags: {
-        'b': 'strong',
-        'i': 'em',
-        'u': 'u',
-        's': 'del',
-        'sub': 'sub',
-        'sup': 'sup',
-        'span': 'span',
-      },
+      allowedTags: [],
+      allowedAttributes: {},
     });
   }
 
   if (inputFormat === 'markdown') {
-    // Convert markdown to visible formatting
-    let html = content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/~~(.*?)~~/g, '<del>$1</del>')
-      .replace(/__(.*?)__/g, '<u>$1</u>')
-      .replace(/~(.*?)~/g, '<sub>$1</sub>')
-      .replace(/\^(.*?)\^/g, '<sup>$1</sup>')
-      .replace(/‾(.*?)‾/g, '<span style="text-decoration: overline">$1</span>');
-
-    return sanitizeHtml(html, {
-      allowedTags: [...ALLOWED_TAGS, 'strong', 'em', 'del'],
-      allowedAttributes: ALLOWED_ATTRIBUTES,
-    });
+    return content
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/~~(.*?)~~/g, '$1')
+      .replace(/__(.*?)__/g, '$1')
+      .replace(/~(.*?)~/g, '$1')
+      .replace(/\^(.*?)\^/g, '$1')
+      .replace(/‾(.*?)‾/g, '$1');
   }
 
   return content;
