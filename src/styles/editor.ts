@@ -40,11 +40,16 @@ export const editorStyles = StyleSheet.create({
   formatButtonTextActive: {
     color: 'white',
   },
+  inputContainer: {
+    position: 'relative',
+    flex: 1,
+  },
   input: {
     padding: 12,
     fontSize: 16,
     color: '#333',
     textAlignVertical: 'top',
     minHeight: 150,
+    zIndex: 1,
   },
 });
