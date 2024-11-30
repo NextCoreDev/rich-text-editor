@@ -10,6 +10,40 @@ export function getSelectedText(text: string, start: number, end: number): strin
   return text.slice(start, end);
 }
 
+export function checkExistingFormat(text: string, format: string): boolean {
+  const tagMap: Record<string, string> = {
+    bold: 'b',
+    italic: 'i',
+    underline: 'u',
+    strikethrough: 's',
+    subscript: 'sub',
+    superscript: 'sup',
+  };
+
+  const tag = tagMap[format];
+  if (!tag) return false;
+
+  const regex = new RegExp(`<${tag}>[^<]*</${tag}>`, 'g');
+  return regex.test(text);
+}
+
+export function removeFormat(text: string, format: string): string {
+  const tagMap: Record<string, string> = {
+    bold: 'b',
+    italic: 'i',
+    underline: 'u',
+    strikethrough: 's',
+    subscript: 'sub',
+    superscript: 'sup',
+  };
+
+  const tag = tagMap[format];
+  if (!tag) return text;
+
+  const regex = new RegExp(`<${tag}>(.*?)</${tag}>`, 'g');
+  return text.replace(regex, '$1');
+}
+
 export function formatText(
   text: string,
   formats: Set<string>,
@@ -17,21 +51,40 @@ export function formatText(
   options?: FormatOptions
 ): string {
   if (!text) return text;
-  
-  // Remove any existing formatting first
-  let formattedText = text.replace(/<[^>]*>/g, '');
+
+  let formattedText = text;
 
   if (outputFormat === 'html') {
-    // Apply formatting in a specific order
-    if (formats.has('bold')) formattedText = `<b>${formattedText}</b>`;
-    if (formats.has('italic')) formattedText = `<i>${formattedText}</i>`;
-    if (formats.has('underline')) formattedText = `<u>${formattedText}</u>`;
-    if (formats.has('strikethrough')) formattedText = `<s>${formattedText}</s>`;
-    if (formats.has('subscript')) formattedText = `<sub>${formattedText}</sub>`;
-    if (formats.has('superscript')) formattedText = `<sup>${formattedText}</sup>`;
-    if (formats.has('overline')) {
-      formattedText = `<span style="text-decoration: overline">${formattedText}</span>`;
-    }
+    // Check each format and toggle if already present
+    formats.forEach(format => {
+      if (checkExistingFormat(formattedText, format)) {
+        formattedText = removeFormat(formattedText, format);
+      } else {
+        switch (format) {
+          case 'bold':
+            formattedText = `<b>${formattedText}</b>`;
+            break;
+          case 'italic':
+            formattedText = `<i>${formattedText}</i>`;
+            break;
+          case 'underline':
+            formattedText = `<u>${formattedText}</u>`;
+            break;
+          case 'strikethrough':
+            formattedText = `<s>${formattedText}</s>`;
+            break;
+          case 'subscript':
+            formattedText = `<sub>${formattedText}</sub>`;
+            break;
+          case 'superscript':
+            formattedText = `<sup>${formattedText}</sup>`;
+            break;
+          case 'overline':
+            formattedText = `<span style="text-decoration: overline">${formattedText}</span>`;
+            break;
+        }
+      }
+    });
 
     // Sanitize the output
     return sanitizeHtml(formattedText, {
@@ -42,13 +95,55 @@ export function formatText(
 
   // Handle markdown formatting
   if (outputFormat === 'markdown') {
-    if (formats.has('bold')) formattedText = `**${formattedText}**`;
-    if (formats.has('italic')) formattedText = `*${formattedText}*`;
-    if (formats.has('strikethrough')) formattedText = `~~${formattedText}~~`;
-    if (formats.has('underline')) formattedText = `__${formattedText}__`;
-    if (formats.has('subscript')) formattedText = `~${formattedText}~`;
-    if (formats.has('superscript')) formattedText = `^${formattedText}^`;
-    if (formats.has('overline')) formattedText = `‾${formattedText}‾`;
+    formats.forEach(format => {
+      const hasFormat = (
+        format === 'bold' && /\*\*(.*?)\*\*/g.test(formattedText) ||
+        format === 'italic' && /\*(.*?)\*/g.test(formattedText) ||
+        format === 'strikethrough' && /~~(.*?)~~/g.test(formattedText) ||
+        format === 'underline' && /__(.*?)__/g.test(formattedText)
+      );
+
+      if (hasFormat) {
+        switch (format) {
+          case 'bold':
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '$1');
+            break;
+          case 'italic':
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '$1');
+            break;
+          case 'strikethrough':
+            formattedText = formattedText.replace(/~~(.*?)~~/g, '$1');
+            break;
+          case 'underline':
+            formattedText = formattedText.replace(/__(.*?)__/g, '$1');
+            break;
+        }
+      } else {
+        switch (format) {
+          case 'bold':
+            formattedText = `**${formattedText}**`;
+            break;
+          case 'italic':
+            formattedText = `*${formattedText}*`;
+            break;
+          case 'strikethrough':
+            formattedText = `~~${formattedText}~~`;
+            break;
+          case 'underline':
+            formattedText = `__${formattedText}__`;
+            break;
+          case 'subscript':
+            formattedText = `~${formattedText}~`;
+            break;
+          case 'superscript':
+            formattedText = `^${formattedText}^`;
+            break;
+          case 'overline':
+            formattedText = `‾${formattedText}‾`;
+            break;
+        }
+      }
+    });
   }
 
   return formattedText;
