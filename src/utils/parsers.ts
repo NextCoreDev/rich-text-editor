@@ -13,39 +13,44 @@ export function parseFormattedText(
   if (!content) return content;
 
   if (inputFormat === 'html') {
-    // Remove nested duplicate tags
+    // Clean up nested tags first
     let cleanedContent = content;
     ALLOWED_TAGS.forEach(tag => {
       const regex = new RegExp(`<${tag}>(<${tag}>.*?<\\/${tag}>)<\\/${tag}>`, 'g');
       while (regex.test(cleanedContent)) {
-        cleanedContent = cleanedContent.replace(regex, '<$1>');
+        cleanedContent = cleanedContent.replace(regex, '$1');
       }
     });
 
-    // Sanitize HTML input
+    // Convert HTML to visible formatting
     return sanitizeHtml(cleanedContent, {
       allowedTags: ALLOWED_TAGS,
       allowedAttributes: ALLOWED_ATTRIBUTES,
+      transformTags: {
+        'b': 'strong',
+        'i': 'em',
+        'u': 'u',
+        's': 'del',
+        'sub': 'sub',
+        'sup': 'sup',
+        'span': 'span',
+      },
     });
   }
 
   if (inputFormat === 'markdown') {
-    // Convert markdown to HTML with proper nesting prevention
+    // Convert markdown to visible formatting
     let html = content
-      .replace(/\*\*\*\*(.*?)\*\*\*\*/g, '<b>$1</b>') // Handle double-nested bold
-      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-      .replace(/\*\*\*(.*?)\*\*\*/g, '<i>$1</i>') // Handle double-nested italic
-      .replace(/\*(.*?)\*/g, '<i>$1</i>')
-      .replace(/~~~~(.*?)~~~~/g, '<s>$1</s>') // Handle double-nested strikethrough
-      .replace(/~~(.*?)~~/g, '<s>$1</s>')
-      .replace(/<u><u>(.*?)<\/u><\/u>/g, '<u>$1</u>') // Handle nested underline
-      .replace(/<sub><sub>(.*?)<\/sub><\/sub>/g, '<sub>$1</sub>') // Handle nested subscript
-      .replace(/<sup><sup>(.*?)<\/sup><\/sup>/g, '<sup>$1</sup>') // Handle nested superscript
-      .replace(/<span style="text-decoration: overline"><span style="text-decoration: overline">(.*?)<\/span><\/span>/g, '<span style="text-decoration: overline">$1</span>');
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/~~(.*?)~~/g, '<del>$1</del>')
+      .replace(/__(.*?)__/g, '<u>$1</u>')
+      .replace(/~(.*?)~/g, '<sub>$1</sub>')
+      .replace(/\^(.*?)\^/g, '<sup>$1</sup>')
+      .replace(/‾(.*?)‾/g, '<span style="text-decoration: overline">$1</span>');
 
-    // Sanitize the converted HTML
     return sanitizeHtml(html, {
-      allowedTags: ALLOWED_TAGS,
+      allowedTags: [...ALLOWED_TAGS, 'strong', 'em', 'del'],
       allowedAttributes: ALLOWED_ATTRIBUTES,
     });
   }

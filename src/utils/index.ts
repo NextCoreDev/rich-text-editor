@@ -1,2 +1,2 @@
-export { formatText } from './formatters';
+export { formatText, getSelectedText } from './formatters';
 export { parseFormattedText } from './parsers';
