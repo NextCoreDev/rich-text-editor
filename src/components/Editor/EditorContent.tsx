@@ -4,9 +4,9 @@ import {
   NativeSyntheticEvent,
   TextInputSelectionChangeEventData,
 } from "react-native";
-import { formatText, getSelectedText } from "../../utils/formatters";
+import { formatText, getSelectedText, parseFormattedText } from "../../utils";
 import type { EditorContentProps } from "../../types";
-import { editorStyles } from "./styles";
+import { editorStyles } from "../../styles";
 
 export function EditorContent({
   value,
@@ -24,10 +24,13 @@ export function EditorContent({
 }: EditorContentProps) {
   const inputRef = useRef<TextInput>(null);
   const selectionRef = useRef({ start: 0, end: 0 });
+  const isFormattingRef = useRef(false);
 
   const handleSelectionChange = useCallback(
     (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
-      selectionRef.current = event.nativeEvent.selection;
+      if (!isFormattingRef.current) {
+        selectionRef.current = event.nativeEvent.selection;
+      }
     },
     []
   );
@@ -40,7 +43,12 @@ export function EditorContent({
 
       // Only format the selected text if there's a selection
       const { start, end } = selectionRef.current;
-      if (start !== end && selectedFormats.size > 0) {
+      if (
+        start !== end &&
+        selectedFormats.size > 0 &&
+        !isFormattingRef.current
+      ) {
+        isFormattingRef.current = true;
         const selectedText = getSelectedText(text, start, end);
         const formattedSelection = formatText(
           selectedText,
@@ -59,8 +67,9 @@ export function EditorContent({
               selection: { start: newPosition, end: newPosition },
             });
           }
+          isFormattingRef.current = false;
         }, 0);
-      } else {
+      } else if (!isFormattingRef.current) {
         onChange(text);
       }
     },
@@ -70,7 +79,8 @@ export function EditorContent({
   // Update text formatting when formats change
   useEffect(() => {
     const { start, end } = selectionRef.current;
-    if (start !== end) {
+    if (start !== end && !isFormattingRef.current) {
+      isFormattingRef.current = true;
       const selectedText = getSelectedText(value, start, end);
       const formattedSelection = formatText(
         selectedText,
@@ -80,34 +90,18 @@ export function EditorContent({
       const newText =
         value.slice(0, start) + formattedSelection + value.slice(end);
       onChange(newText);
+      isFormattingRef.current = false;
     }
   }, [selectedFormats, outputFormat, value, onChange]);
 
-  // Calculate text decoration line
-  const textDecorationLines: ("underline" | "line-through")[] = [];
-  if (selectedFormats.has("underline")) textDecorationLines.push("underline");
-  if (selectedFormats.has("strikethrough"))
-    textDecorationLines.push("line-through");
+  // Parse and display formatted content
+  const displayValue = parseFormattedText(value, outputFormat);
 
   return (
     <TextInput
       ref={inputRef}
-      style={[
-        editorStyles.input,
-        { minHeight },
-        textStyle,
-        {
-          fontWeight: selectedFormats.has("bold") ? "bold" : "normal",
-          fontStyle: selectedFormats.has("italic") ? "italic" : "normal",
-          textDecorationLine: textDecorationLines.length
-            ? (textDecorationLines.join(" ") as
-                | "underline"
-                | "line-through"
-                | "underline line-through")
-            : "none",
-        },
-      ]}
-      value={value}
+      style={[editorStyles.input, { minHeight }, textStyle]}
+      value={displayValue}
       placeholder={placeholder}
       editable={!readOnly}
       onChangeText={handleTextChange}
@@ -116,6 +110,7 @@ export function EditorContent({
       onBlur={onBlur}
       autoFocus={autoFocus}
       multiline
+      textAlignVertical="top"
     />
   );
 }

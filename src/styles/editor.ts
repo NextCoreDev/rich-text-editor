@@ -16,12 +16,17 @@ export const editorStyles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   formatButton: {
     margin: 4,
     padding: 8,
     backgroundColor: 'transparent',
     borderRadius: 4,
+    minWidth: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   formatButtonActive: {
     backgroundColor: '#007AFF',
@@ -30,14 +35,16 @@ export const editorStyles = StyleSheet.create({
     color: '#333',
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
   formatButtonTextActive: {
     color: 'white',
   },
   input: {
-    padding: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
+    padding: 12,
+    fontSize: 16,
+    color: '#333',
+    textAlignVertical: 'top',
+    minHeight: 150,
   },
 });

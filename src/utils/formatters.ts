@@ -39,6 +39,9 @@ export function formatText(
       }
     });
 
+    // Clean up nested tags
+    formattedText = cleanupNestedTags(formattedText);
+
     // Sanitize HTML output
     return sanitizeHtml(formattedText, {
       allowedTags: ALLOWED_TAGS,
@@ -47,7 +50,7 @@ export function formatText(
   }
 
   if (outputFormat === 'markdown') {
-    // Apply markdown formatting in reverse order to handle nested formats correctly
+    // Apply markdown formatting
     const formatOrder = ['overline', 'superscript', 'subscript', 'strikethrough', 'underline', 'italic', 'bold'];
     
     formatOrder.forEach(format => {
@@ -58,9 +61,35 @@ export function formatText(
         }
       }
     });
+
+    // Clean up nested markers
+    formattedText = cleanupNestedMarkers(formattedText);
   }
 
   return formattedText;
+}
+
+function cleanupNestedTags(html: string): string {
+  let cleanedHtml = html;
+  ALLOWED_TAGS.forEach(tag => {
+    const regex = new RegExp(`<${tag}>(<${tag}>.*?<\\/${tag}>)<\\/${tag}>`, 'g');
+    while (regex.test(cleanedHtml)) {
+      cleanedHtml = cleanedHtml.replace(regex, '$1');
+    }
+  });
+  return cleanedHtml;
+}
+
+function cleanupNestedMarkers(markdown: string): string {
+  const markers = ['**', '_', '~~'];
+  let cleanedMarkdown = markdown;
+  markers.forEach(marker => {
+    const regex = new RegExp(`\\${marker}\\${marker}(.*?)\\${marker}\\${marker}`, 'g');
+    while (regex.test(cleanedMarkdown)) {
+      cleanedMarkdown = cleanedMarkdown.replace(regex, `${marker}$1${marker}`);
+    }
+  });
+  return cleanedMarkdown;
 }
 
 function getHtmlTag(format: string): string | null {
@@ -81,10 +110,10 @@ function getMarkdownMarker(format: string): string | null {
     case 'bold': return '**';
     case 'italic': return '_';
     case 'strikethrough': return '~~';
-    case 'underline': return '<u>';
-    case 'subscript': return '<sub>';
-    case 'superscript': return '<sup>';
-    case 'overline': return '<span style="text-decoration: overline">';
+    case 'underline': return '__';
+    case 'subscript': return '~';
+    case 'superscript': return '^';
+    case 'overline': return '‾';
     default: return null;
   }
 }
