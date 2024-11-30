@@ -39,6 +39,18 @@
     "react": ">=16.8.0",
     "react-native": ">=0.63.0"
   },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": false
+    },
+    "react-native": {
+      "optional": false
+    }
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
   "keywords": [
     "rich text editor",
     "wysiwyg",
@@ -46,16 +58,28 @@
     "react",
     "react-native",
     "markdown",
-    "html"
+    "html",
+    "typescript",
+    "editor",
+    "customizable"
   ],
-  "author": "NextCoreDev",
+  "author": {
+    "name": "NextCoreDev",
+    "email": "contactnextcoredev@gmail.com",
+    "url": "https://nextcore.dev"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/nextcoredev/rich-text-editor.git"
   },
   "bugs": {
-    "url": "https://github.com/nextcoredev/rich-text-editor/issues"
+    "url": "https://github.com/nextcoredev/rich-text-editor/issues",
+    "email": "contactnextcoredev@gmail.com"
   },
-  "homepage": "https://github.com/nextcoredev/rich-text-editor#readme"
+  "homepage": "https://github.com/nextcoredev/rich-text-editor#readme",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/nextcoredev"
+  }
 }
