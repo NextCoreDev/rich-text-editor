@@ -1,10 +1,12 @@
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback, useRef, useEffect, useState } from "react";
 import {
   TextInput,
   NativeSyntheticEvent,
   TextInputSelectionChangeEventData,
+  Text,
+  TextStyle,
 } from "react-native";
-import { formatText, getSelectedText, parseFormattedText } from "../../utils";
+import { formatText, getSelectedText } from "../../utils";
 import type { EditorContentProps } from "../../types";
 import { editorStyles } from "../../styles";
 
@@ -23,79 +25,95 @@ export function EditorContent({
   textStyle,
 }: EditorContentProps) {
   const inputRef = useRef<TextInput>(null);
-  const selectionRef = useRef({ start: 0, end: 0 });
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
   const isFormattingRef = useRef(false);
+  const [displayValue, setDisplayValue] = useState(value);
 
+  // Handle text selection changes
   const handleSelectionChange = useCallback(
     (event: NativeSyntheticEvent<TextInputSelectionChangeEventData>) => {
       if (!isFormattingRef.current) {
-        selectionRef.current = event.nativeEvent.selection;
+        setSelection(event.nativeEvent.selection);
       }
     },
     []
   );
 
+  // Handle text changes
   const handleTextChange = useCallback(
     (text: string) => {
-      if (maxLength && text.length > maxLength) {
-        return;
-      }
+      if (maxLength && text.length > maxLength) return;
 
-      // Only format the selected text if there's a selection
-      const { start, end } = selectionRef.current;
-      if (
-        start !== end &&
-        selectedFormats.size > 0 &&
-        !isFormattingRef.current
-      ) {
-        isFormattingRef.current = true;
-        const selectedText = getSelectedText(text, start, end);
-        const formattedSelection = formatText(
-          selectedText,
-          selectedFormats,
-          outputFormat
-        );
-        const newText =
-          text.slice(0, start) + formattedSelection + text.slice(end);
-        onChange(newText);
+      setDisplayValue(text);
 
-        // Update cursor position after formatting
-        setTimeout(() => {
-          if (inputRef.current) {
-            const newPosition = start + formattedSelection.length;
-            inputRef.current.setNativeProps({
-              selection: { start: newPosition, end: newPosition },
-            });
-          }
-          isFormattingRef.current = false;
-        }, 0);
-      } else if (!isFormattingRef.current) {
-        onChange(text);
-      }
+      // Store the raw text without formatting
+      const rawText = text.replace(/<[^>]*>/g, "");
+      onChange(rawText);
     },
-    [maxLength, selectedFormats, outputFormat, onChange]
+    [maxLength, onChange]
   );
 
-  // Update text formatting when formats change
+  // Apply formatting when format buttons are clicked
   useEffect(() => {
-    const { start, end } = selectionRef.current;
-    if (start !== end && !isFormattingRef.current) {
+    if (
+      selection.start !== selection.end &&
+      selectedFormats.size > 0 &&
+      !isFormattingRef.current
+    ) {
       isFormattingRef.current = true;
-      const selectedText = getSelectedText(value, start, end);
-      const formattedSelection = formatText(
+
+      const selectedText = getSelectedText(
+        displayValue,
+        selection.start,
+        selection.end
+      );
+      const formattedText = formatText(
         selectedText,
         selectedFormats,
         outputFormat
       );
-      const newText =
-        value.slice(0, start) + formattedSelection + value.slice(end);
-      onChange(newText);
-      isFormattingRef.current = false;
-    }
-  }, [selectedFormats, outputFormat, value, onChange]);
 
-  // Parse and display formatted content
-  const displayValue = parseFormattedText(value, outputFormat);
+      const newText =
+        displayValue.slice(0, selection.start) +
+        formattedText +
+        displayValue.slice(selection.end);
+      setDisplayValue(newText);
+
+      // Update cursor position
+      setTimeout(() => {
+        if (inputRef.current) {
+          const newPosition = selection.start + formattedText.length;
+          inputRef.current.setNativeProps({
+            selection: { start: newPosition, end: newPosition },
+          });
+        }
+        isFormattingRef.current = false;
+      }, 0);
+    }
+  }, [selectedFormats, outputFormat, selection, displayValue]);
+
+  // Render formatted text
+  const renderFormattedText = useCallback(() => {
+    return displayValue.split(/(<[^>]*>.*?<\/[^>]*>)/g).map((part, index) => {
+      if (part.startsWith("<")) {
+        const style: TextStyle = {
+          fontWeight: part.includes("<b>") ? "bold" : "normal",
+          fontStyle: part.includes("<i>") ? "italic" : "normal",
+          textDecorationLine: part.includes("<u>")
+            ? "underline"
+            : part.includes("<s>")
+              ? "line-through"
+              : "none",
+        };
+        return (
+          <Text key={index} style={style}>
+            {part.replace(/<[^>]*>/g, "")}
+          </Text>
+        );
+      }
+      return <Text key={index}>{part}</Text>;
+    });
+  }, [displayValue]);
 
   return (
     <TextInput
@@ -111,6 +129,8 @@ export function EditorContent({
       autoFocus={autoFocus}
       multiline
       textAlignVertical="top"
-    />
+    >
+      {renderFormattedText()}
+    </TextInput>
   );
 }

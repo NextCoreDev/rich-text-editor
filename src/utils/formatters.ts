@@ -18,111 +18,38 @@ export function formatText(
 ): string {
   if (!text) return text;
   
-  let formattedText = text;
-
-  // Remove existing formatting first
-  formattedText = sanitizeHtml(formattedText, {
-    allowedTags: [],
-    allowedAttributes: {},
-  });
+  // Remove any existing formatting first
+  let formattedText = text.replace(/<[^>]*>/g, '');
 
   if (outputFormat === 'html') {
-    // Apply formatting in a specific order to prevent nesting issues
-    const formatOrder = ['bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', 'overline'];
-    
-    formatOrder.forEach(format => {
-      if (formats.has(format)) {
-        const tag = getHtmlTag(format);
-        if (tag) {
-          formattedText = wrapWithTag(formattedText, tag);
-        }
-      }
-    });
+    // Apply formatting in a specific order
+    if (formats.has('bold')) formattedText = `<b>${formattedText}</b>`;
+    if (formats.has('italic')) formattedText = `<i>${formattedText}</i>`;
+    if (formats.has('underline')) formattedText = `<u>${formattedText}</u>`;
+    if (formats.has('strikethrough')) formattedText = `<s>${formattedText}</s>`;
+    if (formats.has('subscript')) formattedText = `<sub>${formattedText}</sub>`;
+    if (formats.has('superscript')) formattedText = `<sup>${formattedText}</sup>`;
+    if (formats.has('overline')) {
+      formattedText = `<span style="text-decoration: overline">${formattedText}</span>`;
+    }
 
-    // Clean up nested tags
-    formattedText = cleanupNestedTags(formattedText);
-
-    // Sanitize HTML output
+    // Sanitize the output
     return sanitizeHtml(formattedText, {
       allowedTags: ALLOWED_TAGS,
       allowedAttributes: ALLOWED_ATTRIBUTES,
     });
   }
 
+  // Handle markdown formatting
   if (outputFormat === 'markdown') {
-    // Apply markdown formatting
-    const formatOrder = ['overline', 'superscript', 'subscript', 'strikethrough', 'underline', 'italic', 'bold'];
-    
-    formatOrder.forEach(format => {
-      if (formats.has(format)) {
-        const marker = getMarkdownMarker(format);
-        if (marker) {
-          formattedText = `${marker}${formattedText}${marker}`;
-        }
-      }
-    });
-
-    // Clean up nested markers
-    formattedText = cleanupNestedMarkers(formattedText);
+    if (formats.has('bold')) formattedText = `**${formattedText}**`;
+    if (formats.has('italic')) formattedText = `*${formattedText}*`;
+    if (formats.has('strikethrough')) formattedText = `~~${formattedText}~~`;
+    if (formats.has('underline')) formattedText = `__${formattedText}__`;
+    if (formats.has('subscript')) formattedText = `~${formattedText}~`;
+    if (formats.has('superscript')) formattedText = `^${formattedText}^`;
+    if (formats.has('overline')) formattedText = `‾${formattedText}‾`;
   }
 
   return formattedText;
-}
-
-function cleanupNestedTags(html: string): string {
-  let cleanedHtml = html;
-  ALLOWED_TAGS.forEach(tag => {
-    const regex = new RegExp(`<${tag}>(<${tag}>.*?<\\/${tag}>)<\\/${tag}>`, 'g');
-    while (regex.test(cleanedHtml)) {
-      cleanedHtml = cleanedHtml.replace(regex, '$1');
-    }
-  });
-  return cleanedHtml;
-}
-
-function cleanupNestedMarkers(markdown: string): string {
-  const markers = ['**', '_', '~~'];
-  let cleanedMarkdown = markdown;
-  markers.forEach(marker => {
-    const regex = new RegExp(`\\${marker}\\${marker}(.*?)\\${marker}\\${marker}`, 'g');
-    while (regex.test(cleanedMarkdown)) {
-      cleanedMarkdown = cleanedMarkdown.replace(regex, `${marker}$1${marker}`);
-    }
-  });
-  return cleanedMarkdown;
-}
-
-function getHtmlTag(format: string): string | null {
-  switch (format) {
-    case 'bold': return 'b';
-    case 'italic': return 'i';
-    case 'underline': return 'u';
-    case 'strikethrough': return 's';
-    case 'subscript': return 'sub';
-    case 'superscript': return 'sup';
-    case 'overline': return 'span style="text-decoration: overline"';
-    default: return null;
-  }
-}
-
-function getMarkdownMarker(format: string): string | null {
-  switch (format) {
-    case 'bold': return '**';
-    case 'italic': return '_';
-    case 'strikethrough': return '~~';
-    case 'underline': return '__';
-    case 'subscript': return '~';
-    case 'superscript': return '^';
-    case 'overline': return '‾';
-    default: return null;
-  }
-}
-
-function wrapWithTag(text: string, tag: string): string {
-  const hasStyle = tag.includes('style=');
-  if (hasStyle) {
-    const [tagName, ...attributes] = tag.split(' ');
-    return `<${tag}>${text}</${tagName}>`;
-  }
-  return `<${tag}>${text}</${tag}>`;
 }
