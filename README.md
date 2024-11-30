@@ -4,15 +4,15 @@ A powerful and flexible rich text editor component for React and React Native ap
 
 ## Features
 
-- 📝 Rich text editing with real-time formatting
-- 🔄 HTML and Markdown support
-- 🎨 Customizable formatting toolbar
-- 👀 Live preview with Viewer component
-- 🔒 Built-in HTML sanitization
+- 📝 Smart text formatting with selection-based editing
+- 🎨 Visual formatting toolbar with active state indicators
+- 🔄 Support for both HTML and Markdown output
+- 🧹 Automatic cleanup of nested tags and formatting
+- 🔒 Built-in HTML sanitization for security
+- 📱 Cross-platform (React Native & Web)
 - 🎯 Full TypeScript support
 - 💅 Extensive styling options
 - ♿ Accessibility support
-- 📱 Cross-platform (React Native & Web)
 
 ## Installation
 
@@ -54,11 +54,18 @@ const styles = StyleSheet.create({
 });
 ```
 
+## Smart Formatting Features
+
+- **Selection-Based Formatting**: Format only selected text instead of the entire content
+- **Format State Tracking**: Visual feedback for active formatting options
+- **Nested Tag Prevention**: Automatically prevents and cleans up nested formatting tags
+- **Smart Tag Handling**: Proper handling of HTML tags and Markdown syntax
+
 ## Components
 
 ### Editor Component
 
-The main rich text editor component with formatting capabilities:
+The main rich text editor component with smart formatting capabilities:
 
 ```tsx
 <Editor
@@ -190,6 +197,37 @@ const styles = StyleSheet.create({
 });
 ```
 
+## Best Practices
+
+1. Text Selection
+
+   - Select text before applying formatting
+   - Use format toolbar buttons for consistent formatting
+   - Clear selection to start fresh formatting
+
+2. Content Management
+
+   - Handle content changes through the `onChange` prop
+   - Implement proper content validation
+   - Consider content length limits
+
+3. Formatting
+
+   - Use consistent format options across your app
+   - Consider platform-specific formatting needs
+   - Test formatting in both HTML and Markdown modes
+
+4. Styling
+
+   - Follow platform design guidelines
+   - Ensure proper contrast ratios
+   - Test different content lengths
+
+5. Performance
+   - Handle large content efficiently
+   - Implement proper error boundaries
+   - Consider debouncing content updates
+
 ## Security
 
 Built-in security features:
@@ -198,6 +236,7 @@ Built-in security features:
 - XSS attack prevention
 - Configurable allowed tags and attributes
 - Safe content parsing and rendering
+- Nested tag cleanup
 
 ## TypeScript Support
 
@@ -213,37 +252,6 @@ import type {
 } from "rich-textify";
 ```
 
-## Best Practices
-
-1. Content Management
-
-   - Always handle content changes through the `onChange` prop
-   - Implement proper content validation
-   - Consider content length limits
-
-2. Formatting
-
-   - Use consistent format options across your app
-   - Consider platform-specific formatting needs
-   - Test formatting in both HTML and Markdown modes
-
-3. Styling
-
-   - Follow platform design guidelines
-   - Ensure proper contrast ratios
-   - Test different content lengths
-
-4. Accessibility
-
-   - Provide meaningful labels
-   - Support screen readers
-   - Test keyboard navigation
-
-5. Performance
-   - Handle large content efficiently
-   - Implement proper error boundaries
-   - Consider debouncing content updates
-
 ## Contributing
 
 1. Fork the repository
@@ -258,5 +266,5 @@ MIT © NextCoreDev
 
 ## Support
 
-- GitHub Issues: [Report a bug](https://github.com/NextCoreDev/rich-textify/issues)
-- Documentation: [View full documentation](https://github.com/nextcoredev/rich-textify#readme)
+- GitHub Issues: [Report a bug](https://github.com/nextcoredev/rich-text-editor/issues)
+- Documentation: [View full documentation](https://github.com/nextcoredev/rich-text-editor#readme)

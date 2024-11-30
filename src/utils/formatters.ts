@@ -1,10 +1,14 @@
 import sanitizeHtml from 'sanitize-html';
 import type { OutputFormat, FormatOptions } from '../types';
 
-const ALLOWED_TAGS = ['b', 'i', 'u', 's', 'span'];
+const ALLOWED_TAGS = ['b', 'i', 'u', 's', 'span', 'sub', 'sup'];
 const ALLOWED_ATTRIBUTES = {
   span: ['style'],
 };
+
+export function getSelectedText(text: string, start: number, end: number): string {
+  return text.slice(start, end);
+}
 
 export function formatText(
   text: string,
@@ -12,69 +16,77 @@ export function formatText(
   outputFormat: OutputFormat,
   options?: FormatOptions
 ): string {
+  if (!text) return text;
+  
   let formattedText = text;
+  const appliedTags = new Set<string>();
 
   if (outputFormat === 'html') {
     formats.forEach((format) => {
-      switch (format) {
-        case 'bold':
-          formattedText = `<b>${formattedText}</b>`;
-          break;
-        case 'italic':
-          formattedText = `<i>${formattedText}</i>`;
-          break;
-        case 'underline':
-          formattedText = `<u>${formattedText}</u>`;
-          break;
-        case 'strikethrough':
-          formattedText = `<s>${formattedText}</s>`;
-          break;
-        case 'overline':
-          formattedText = `<span style="text-decoration: overline">${formattedText}</span>`;
-          break;
-        case 'subscript':
-          formattedText = `<sub>${formattedText}</sub>`;
-          break;
-        case 'superscript':
-          formattedText = `<sup>${formattedText}</sup>`;
-          break;
+      // Prevent duplicate tags
+      if (appliedTags.has(format)) return;
+
+      const tag = getHtmlTag(format);
+      if (tag) {
+        formattedText = wrapWithTag(formattedText, tag);
+        appliedTags.add(format);
       }
     });
 
     // Sanitize HTML output
-    formattedText = sanitizeHtml(formattedText, {
+    return sanitizeHtml(formattedText, {
       allowedTags: ALLOWED_TAGS,
       allowedAttributes: ALLOWED_ATTRIBUTES,
     });
-  } else if (outputFormat === 'markdown') {
+  }
+
+  if (outputFormat === 'markdown') {
     formats.forEach((format) => {
-      switch (format) {
-        case 'bold':
-          formattedText = `**${formattedText}**`;
-          break;
-        case 'italic':
-          formattedText = `*${formattedText}*`;
-          break;
-        case 'strikethrough':
-          formattedText = `~~${formattedText}~~`;
-          break;
-        // Note: Markdown doesn't have native underline, overline, subscript, or superscript
-        case 'underline':
-        case 'overline':
-        case 'subscript':
-        case 'superscript':
-          // Keep HTML for unsupported markdown formats
-          formattedText = format === 'underline'
-            ? `<u>${formattedText}</u>`
-            : format === 'subscript'
-            ? `<sub>${formattedText}</sub>`
-            : format === 'superscript'
-            ? `<sup>${formattedText}</sup>`
-            : `<span style="text-decoration: overline">${formattedText}</span>`;
-          break;
+      if (appliedTags.has(format)) return;
+      
+      const marker = getMarkdownMarker(format);
+      if (marker) {
+        formattedText = `${marker}${formattedText}${marker}`;
+        appliedTags.add(format);
       }
     });
   }
 
   return formattedText;
+}
+
+function getHtmlTag(format: string): string | null {
+  switch (format) {
+    case 'bold': return 'b';
+    case 'italic': return 'i';
+    case 'underline': return 'u';
+    case 'strikethrough': return 's';
+    case 'subscript': return 'sub';
+    case 'superscript': return 'sup';
+    case 'overline': return 'span style="text-decoration: overline"';
+    default: return null;
+  }
+}
+
+function getMarkdownMarker(format: string): string | null {
+  switch (format) {
+    case 'bold': return '**';
+    case 'italic': return '_';
+    case 'strikethrough': return '~~';
+    // HTML tags for unsupported markdown formats
+    case 'underline': return '<u>';
+    case 'subscript': return '<sub>';
+    case 'superscript': return '<sup>';
+    case 'overline': return '<span style="text-decoration: overline">';
+    default: return null;
+  }
+}
+
+function wrapWithTag(text: string, tag: string): string {
+  const hasStyle = tag.includes('style=');
+  if (hasStyle) {
+    const [tagName, ...attributes] = tag.split(' ');
+    return `<${tag}>${text}</${tagName}>`;
+  }
+  return `<${tag}>${text}</${tag}>`;
 }
