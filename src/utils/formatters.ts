@@ -40,8 +40,7 @@ export function removeFormat(text: string, format: string): string {
   const tag = tagMap[format];
   if (!tag) return text;
 
-  const regex = new RegExp(`<${tag}>(.*?)</${tag}>`, 'g');
-  return text.replace(regex, '$1');
+  return text.replace(new RegExp(`<${tag}>(.*?)</${tag}>`, 'g'), '$1');
 }
 
 export function formatText(
@@ -55,9 +54,10 @@ export function formatText(
   let formattedText = text;
 
   if (outputFormat === 'html') {
-    // Check each format and toggle if already present
     formats.forEach(format => {
-      if (checkExistingFormat(formattedText, format)) {
+      const hasFormat = checkExistingFormat(formattedText, format);
+      
+      if (hasFormat) {
         formattedText = removeFormat(formattedText, format);
       } else {
         switch (format) {
@@ -86,7 +86,6 @@ export function formatText(
       }
     });
 
-    // Sanitize the output
     return sanitizeHtml(formattedText, {
       allowedTags: ALLOWED_TAGS,
       allowedAttributes: ALLOWED_ATTRIBUTES,
@@ -131,15 +130,6 @@ export function formatText(
             break;
           case 'underline':
             formattedText = `__${formattedText}__`;
-            break;
-          case 'subscript':
-            formattedText = `~${formattedText}~`;
-            break;
-          case 'superscript':
-            formattedText = `^${formattedText}^`;
-            break;
-          case 'overline':
-            formattedText = `‾${formattedText}‾`;
             break;
         }
       }

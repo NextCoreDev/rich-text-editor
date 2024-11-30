@@ -8,7 +8,6 @@ import {
 import { formatText, getSelectedText, checkExistingFormat } from "../../utils";
 import type { EditorContentProps } from "../../types";
 import { editorStyles } from "../../styles";
-import { RenderFormattedText } from "./RenderFormattedText";
 
 export function EditorContent({
   value,
@@ -27,12 +26,6 @@ export function EditorContent({
   const inputRef = useRef<TextInput>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const isFormattingRef = useRef(false);
-  const [displayValue, setDisplayValue] = useState(value);
-
-  // Update display value when value prop changes
-  useEffect(() => {
-    setDisplayValue(value);
-  }, [value]);
 
   // Handle text selection changes
   const handleSelectionChange = useCallback(
@@ -44,7 +37,7 @@ export function EditorContent({
         // Check for existing formats in selection
         if (newSelection.start !== newSelection.end) {
           const selectedText = getSelectedText(
-            displayValue,
+            value,
             newSelection.start,
             newSelection.end
           );
@@ -56,15 +49,13 @@ export function EditorContent({
         }
       }
     },
-    [displayValue, selectedFormats]
+    [value, selectedFormats]
   );
 
   // Handle text changes
   const handleTextChange = useCallback(
     (text: string) => {
       if (maxLength && text.length > maxLength) return;
-
-      setDisplayValue(text);
       onChange(text);
     },
     [maxLength, onChange]
@@ -80,7 +71,7 @@ export function EditorContent({
       isFormattingRef.current = true;
 
       const selectedText = getSelectedText(
-        displayValue,
+        value,
         selection.start,
         selection.end
       );
@@ -91,9 +82,9 @@ export function EditorContent({
       );
 
       const newText =
-        displayValue.slice(0, selection.start) +
+        value.slice(0, selection.start) +
         formattedText +
-        displayValue.slice(selection.end);
+        value.slice(selection.end);
       handleTextChange(newText);
 
       // Update cursor position
@@ -107,20 +98,14 @@ export function EditorContent({
         isFormattingRef.current = false;
       }, 0);
     }
-  }, [
-    selectedFormats,
-    outputFormat,
-    selection,
-    displayValue,
-    handleTextChange,
-  ]);
+  }, [selectedFormats, outputFormat, selection, value, handleTextChange]);
 
   return (
     <View style={editorStyles.inputContainer}>
       <TextInput
         ref={inputRef}
         style={[editorStyles.input, { minHeight }, textStyle]}
-        value={displayValue}
+        value={value}
         placeholder={placeholder}
         editable={!readOnly}
         onChangeText={handleTextChange}
@@ -131,7 +116,6 @@ export function EditorContent({
         multiline
         textAlignVertical="top"
       />
-      <RenderFormattedText value={displayValue} style={textStyle} />
     </View>
   );
 }

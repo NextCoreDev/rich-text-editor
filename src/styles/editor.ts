@@ -50,6 +50,5 @@ export const editorStyles = StyleSheet.create({
     color: '#333',
     textAlignVertical: 'top',
     minHeight: 150,
-    zIndex: 1,
   },
 });
