@@ -51,4 +51,5 @@ export const editorStyles = StyleSheet.create({
     textAlignVertical: 'top',
     minHeight: 150,
   },
+  
 });
