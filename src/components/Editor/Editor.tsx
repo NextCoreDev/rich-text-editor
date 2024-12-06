@@ -1,24 +1,23 @@
-import React from 'react';
-import { View } from 'react-native';
-import { FormatBar } from './FormatBar';
-import { EditorContent } from './EditorContent';
-import { useFormatState } from '../../hooks';
-import { DEFAULT_FORMAT_OPTIONS } from '../../constants';
-import { editorStyles } from '../../styles';
-import type { EditorProps } from '../../types';
+import React from "react";
+import { View } from "react-native";
+import { FormatBar } from "./FormatBar";
+import { EditorContent } from "./EditorContent";
+import { useFormatState } from "../../hooks";
+import { DEFAULT_FORMAT_OPTIONS } from "../../constants";
+import { editorStyles } from "../../styles";
+import type { EditorProps } from "../../types";
 
 export function Editor({
   value,
   onChange,
-  outputFormat = 'html',
+  outputFormat = "html",
   style,
   formatOptions = DEFAULT_FORMAT_OPTIONS,
-  className,
-  placeholder,
+  placeholder = "Start typing...",
   maxLength,
-  minHeight,
-  autoFocus,
-  readOnly,
+  minHeight = 150,
+  autoFocus = false,
+  readOnly = false,
   onFocus,
   onBlur,
 }: EditorProps) {

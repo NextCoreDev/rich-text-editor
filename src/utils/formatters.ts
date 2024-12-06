@@ -1,7 +1,7 @@
 import sanitizeHtml from 'sanitize-html';
-import type { OutputFormat, FormatOptions } from '../types';
+import type { OutputFormat } from '../types';
 
-const ALLOWED_TAGS = ['b', 'i', 'u', 's', 'span', 'sub', 'sup'];
+const ALLOWED_TAGS = ['b', 'i', 'u', 's', 'sub', 'sup'];
 const ALLOWED_ATTRIBUTES = {
   span: ['style'],
 };
@@ -46,95 +46,42 @@ export function removeFormat(text: string, format: string): string {
 export function formatText(
   text: string,
   formats: Set<string>,
-  outputFormat: OutputFormat,
-  options?: FormatOptions
+  outputFormat: OutputFormat
 ): string {
   if (!text) return text;
 
   let formattedText = text;
 
-  if (outputFormat === 'html') {
-    formats.forEach(format => {
-      const hasFormat = checkExistingFormat(formattedText, format);
-      
-      if (hasFormat) {
-        formattedText = removeFormat(formattedText, format);
-      } else {
-        switch (format) {
-          case 'bold':
-            formattedText = `<b>${formattedText}</b>`;
-            break;
-          case 'italic':
-            formattedText = `<i>${formattedText}</i>`;
-            break;
-          case 'underline':
-            formattedText = `<u>${formattedText}</u>`;
-            break;
-          case 'strikethrough':
-            formattedText = `<s>${formattedText}</s>`;
-            break;
-          case 'subscript':
-            formattedText = `<sub>${formattedText}</sub>`;
-            break;
-          case 'superscript':
-            formattedText = `<sup>${formattedText}</sup>`;
-            break;
-          case 'overline':
-            formattedText = `<span style="text-decoration: overline">${formattedText}</span>`;
-            break;
-        }
+  formats.forEach((format) => {
+    const hasFormat = checkExistingFormat(formattedText, format);
+    if (hasFormat) {
+      formattedText = removeFormat(formattedText, format);
+    } else {
+      switch (format) {
+        case 'bold':
+          formattedText = `<b>${formattedText}</b>`;
+          break;
+        case 'italic':
+          formattedText = `<i>${formattedText}</i>`;
+          break;
+        case 'underline':
+          formattedText = `<u>${formattedText}</u>`;
+          break;
+        case 'strikethrough':
+          formattedText = `<s>${formattedText}</s>`;
+          break;
+        case 'subscript':
+          formattedText = `<sub>${formattedText}</sub>`;
+          break;
+        case 'superscript':
+          formattedText = `<sup>${formattedText}</sup>`;
+          break;
       }
-    });
+    }
+  });
 
-    return sanitizeHtml(formattedText, {
-      allowedTags: ALLOWED_TAGS,
-      allowedAttributes: ALLOWED_ATTRIBUTES,
-    });
-  }
-
-  // Handle markdown formatting
-  if (outputFormat === 'markdown') {
-    formats.forEach(format => {
-      const hasFormat = (
-        format === 'bold' && /\*\*(.*?)\*\*/g.test(formattedText) ||
-        format === 'italic' && /\*(.*?)\*/g.test(formattedText) ||
-        format === 'strikethrough' && /~~(.*?)~~/g.test(formattedText) ||
-        format === 'underline' && /__(.*?)__/g.test(formattedText)
-      );
-
-      if (hasFormat) {
-        switch (format) {
-          case 'bold':
-            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '$1');
-            break;
-          case 'italic':
-            formattedText = formattedText.replace(/\*(.*?)\*/g, '$1');
-            break;
-          case 'strikethrough':
-            formattedText = formattedText.replace(/~~(.*?)~~/g, '$1');
-            break;
-          case 'underline':
-            formattedText = formattedText.replace(/__(.*?)__/g, '$1');
-            break;
-        }
-      } else {
-        switch (format) {
-          case 'bold':
-            formattedText = `**${formattedText}**`;
-            break;
-          case 'italic':
-            formattedText = `*${formattedText}*`;
-            break;
-          case 'strikethrough':
-            formattedText = `~~${formattedText}~~`;
-            break;
-          case 'underline':
-            formattedText = `__${formattedText}__`;
-            break;
-        }
-      }
-    });
-  }
-
-  return formattedText;
+  return sanitizeHtml(formattedText, {
+    allowedTags: ALLOWED_TAGS,
+    allowedAttributes: ALLOWED_ATTRIBUTES,
+  });
 }

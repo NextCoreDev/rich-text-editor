@@ -8,7 +8,6 @@ export interface FormatOptions {
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
-  overline?: boolean;
   subscript?: boolean;
   superscript?: boolean;
 }
@@ -20,7 +19,6 @@ export interface EditorProps {
   formatOptions?: FormatOptions;
   style?: ViewStyle;
   textStyle?: TextStyle;
-  className?: string;
   placeholder?: string;
   maxLength?: number;
   minHeight?: number;
@@ -35,7 +33,6 @@ export interface ViewerProps {
   inputFormat?: InputFormat;
   style?: ViewStyle;
   textStyle?: TextStyle;
-  className?: string;
   sanitize?: boolean;
 }
 
@@ -44,26 +41,25 @@ export interface FormatBarProps {
   selectedFormats: Set<string>;
   onFormatChange: (format: string) => void;
 }
-
 export interface FormatButtonProps {
-  format: string;
-  icon: string;
+  format: string; 
+  icon: string; 
   isActive: boolean;
   onPress: () => void;
   tooltip?: string;
 }
 
 export interface EditorContentProps {
-  value: string;
-  onChange: (value: string) => void;
-  selectedFormats: Set<string>;
+  value: string; 
+  onChange: (value: string) => void; 
+  selectedFormats: Set<string>; 
   outputFormat: OutputFormat;
   placeholder?: string;
   maxLength?: number;
-  minHeight?: number;
-  autoFocus?: boolean;
-  readOnly?: boolean;
-  onFocus?: () => void;
-  onBlur?: () => void;
-  textStyle?: TextStyle;
+  minHeight?: number; 
+  autoFocus?: boolean; 
+  readOnly?: boolean; 
+  onFocus?: () => void; 
+  onBlur?: () => void; 
+  textStyle?: TextStyle; 
 }
